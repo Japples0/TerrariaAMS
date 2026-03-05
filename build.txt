@@ -1,0 +1,3 @@
+displayName = Ammo Management System
+author = Japples07
+version = 0.1
