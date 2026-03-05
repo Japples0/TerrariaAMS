@@ -68,15 +68,28 @@ namespace AMS.UI
 
             Player player = Main.LocalPlayer;
 
-            Vector2 center = player.Center - Main.screenPosition;
+            Vector2 center = player.MountedCenter - Main.screenPosition;
 
             Texture2D pixel = TextureAssets.MagicPixel.Value;
 
             float radius = MaxRadius * EaseOut(animationProgress);
 
-            float rotation = Main.GameUpdateCount * 0.01f;
+            float rotation = 0f;
 
             Color slotColor = Color.White * animationProgress;
+
+            float backgroundSize = radius * 2f + 80f;
+
+            Rectangle bgRect = new (
+                (int)center.X - (int)(backgroundSize / 2),
+                (int)center.Y - (int)(backgroundSize / 2),
+                (int)backgroundSize,
+                (int)backgroundSize
+            );
+
+            Color bgColor = new Color(63, 82, 151) * 0.6f * animationProgress;
+
+            spriteBatch.Draw(pixel, bgRect, bgColor);
 
             for (int i = 0; i < SlotCount; i++)
             {
@@ -91,7 +104,7 @@ namespace AMS.UI
                     40
                 );
 
-                spriteBatch.Draw(pixel, rect, slotColor * 0.8f);
+                spriteBatch.Draw(pixel, rect, new Color(100, 120, 200) * animationProgress);
             }
         }
 
