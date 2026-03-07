@@ -1,1 +1,27 @@
-"Keybinds.Ammo Wheel.DisplayName": Ammo  Wheel
+"Keybinds.Ammo Wheel.DisplayName": Ammo Wheel
+
+Configs: {
+	AmmoWheelClientConfig: {
+		DisplayName: Ammo Wheel Settings
+
+		Headers: {
+			Interaction: Interaction
+			WheelPosition: Wheel Position
+		}
+
+		ToggleWheelOnPress: {
+			Label: Press To Toggle Wheel
+			Tooltip: If enabled, pressing the keybind toggles the wheel open/closed instead of holding the key.
+		}
+
+		WheelOffsetX: {
+			Label: Wheel Offset X
+			Tooltip: Moves the wheel left/right from screen center.
+		}
+
+		WheelOffsetY: {
+			Label: Wheel Offset Y
+			Tooltip: Moves the wheel up/down from screen center.
+		}
+	}
+}

@@ -11,12 +11,12 @@
       "RelativeMoniker": "D:0:0:{804F3E66-42F2-7564-CC8B-A39DCD608676}|AMS.csproj|solutionrelative:amsplayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{804F3E66-42F2-7564-CC8B-A39DCD608676}|AMS.csproj|c:\\users\\josha\\onedrive\\documents\\my games\\terraria\\tmodloader\\modsources\\ams\\systems\\uisystems.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{804F3E66-42F2-7564-CC8B-A39DCD608676}|AMS.csproj|solutionrelative:systems\\uisystems.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{804F3E66-42F2-7564-CC8B-A39DCD608676}|AMS.csproj|c:\\users\\josha\\onedrive\\documents\\my games\\terraria\\tmodloader\\modsources\\ams\\ams.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{804F3E66-42F2-7564-CC8B-A39DCD608676}|AMS.csproj|solutionrelative:ams.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{804F3E66-42F2-7564-CC8B-A39DCD608676}|AMS.csproj|c:\\users\\josha\\onedrive\\documents\\my games\\terraria\\tmodloader\\modsources\\ams\\systems\\uisystems.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{804F3E66-42F2-7564-CC8B-A39DCD608676}|AMS.csproj|solutionrelative:systems\\uisystems.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,7 +30,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "UISystems.cs",
               "DocumentMoniker": "C:\\Users\\josha\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\AMS\\Systems\\UISystems.cs",
               "RelativeDocumentMoniker": "Systems\\UISystems.cs",
@@ -38,7 +38,8 @@
               "RelativeToolTip": "Systems\\UISystems.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T10:22:31.179Z"
+              "WhenOpened": "2026-03-05T10:22:31.179Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -48,22 +49,23 @@
               "RelativeDocumentMoniker": "UI\\AmmoWheelUI.cs",
               "ToolTip": "C:\\Users\\josha\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\AMS\\UI\\AmmoWheelUI.cs",
               "RelativeToolTip": "UI\\AmmoWheelUI.cs",
-              "ViewState": "AgIAAG8AAAAAAAAAAAAqwIQAAAALAAAAAAAAAA==",
+              "ViewState": "AgIAAJgAAAAAAAAAAAAYwK0AAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-05T10:21:37.378Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "AMS.cs",
               "DocumentMoniker": "C:\\Users\\josha\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\AMS\\AMS.cs",
               "RelativeDocumentMoniker": "AMS.cs",
               "ToolTip": "C:\\Users\\josha\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\AMS\\AMS.cs",
               "RelativeToolTip": "AMS.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAsAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T10:19:16.917Z"
+              "WhenOpened": "2026-03-05T10:19:16.917Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -73,7 +75,7 @@
               "RelativeDocumentMoniker": "AMSPlayer.cs",
               "ToolTip": "C:\\Users\\josha\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\AMS\\AMSPlayer.cs",
               "RelativeToolTip": "AMSPlayer.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-05T10:16:30.102Z",
               "EditorCaption": ""
