@@ -1,4 +1,29 @@
+# Build outputs
 bin/
 obj/
+
+# tModLoader build files
 *.tmod
-*.cache
+*.tmod.old
+*.pdb
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider
+.idea/
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+*.tmp
+
+# OS junk
+.DS_Store
+Thumbs.db
