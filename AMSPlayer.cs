@@ -1,8 +1,10 @@
 using AMS.Systems;
 using System;
 using System.Collections.Generic;
+using Terraria.Audio;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -11,12 +13,25 @@ namespace AMS
     public class AMSPlayer : ModPlayer
     {
         public const int MaxAmmoSlots = 6;
+        public const int StartingAmmoSlots = 1;
 
-        public int unlockedAmmoSlots = MaxAmmoSlots;
+        public int unlockedAmmoSlots = StartingAmmoSlots;
+        public int selectedAmmoSlot;
         public Item[] ammoSlots;
+
+        // Placeholder SFX. Swap this to a custom SoundStyle path when your wheel sound is ready.
+        private static readonly SoundStyle WheelRotateSoundPlaceholder = SoundID.MenuTick with
+        {
+            Volume = 0.65f,
+            PitchVariance = 0.08f
+        };
+
+        public bool HasUnlockedAllAmmoSlots => unlockedAmmoSlots >= MaxAmmoSlots;
 
         public override void Initialize()
         {
+            unlockedAmmoSlots = StartingAmmoSlots;
+            selectedAmmoSlot = 0;
             ammoSlots = new Item[MaxAmmoSlots];
 
             for (int i = 0; i < ammoSlots.Length; i++)
@@ -29,6 +44,7 @@ namespace AMS
         public override void SaveData(TagCompound tag)
         {
             tag["ammoSlotsUnlocked"] = unlockedAmmoSlots;
+            tag["selectedAmmoSlot"] = selectedAmmoSlot;
 
             List<TagCompound> savedSlots = new List<TagCompound>(ammoSlots.Length);
             for (int i = 0; i < ammoSlots.Length; i++)
@@ -39,14 +55,14 @@ namespace AMS
 
         public override void LoadData(TagCompound tag)
         {
-            unlockedAmmoSlots = MaxAmmoSlots;
+            unlockedAmmoSlots = StartingAmmoSlots;
+            selectedAmmoSlot = 0;
 
             if (tag.ContainsKey("ammoSlotsUnlocked"))
-                unlockedAmmoSlots = Math.Clamp(tag.GetInt("ammoSlotsUnlocked"), 1, MaxAmmoSlots);
+                unlockedAmmoSlots = Math.Clamp(tag.GetInt("ammoSlotsUnlocked"), StartingAmmoSlots, MaxAmmoSlots);
 
-            // Migrate early saves (single unlocked slot) while unlock progression isn't implemented.
-            if (unlockedAmmoSlots == 1)
-                unlockedAmmoSlots = MaxAmmoSlots;
+            if (tag.ContainsKey("selectedAmmoSlot"))
+                selectedAmmoSlot = tag.GetInt("selectedAmmoSlot");
 
             for (int i = 0; i < ammoSlots.Length; i++)
             {
@@ -55,18 +71,22 @@ namespace AMS
             }
 
             if (!tag.ContainsKey("ammoSlots"))
+            {
+                selectedAmmoSlot = GetSelectedAmmoSlotIndex();
                 return;
+            }
 
             IList<TagCompound> savedSlots = tag.GetList<TagCompound>("ammoSlots");
             for (int i = 0; i < ammoSlots.Length && i < savedSlots.Count; i++)
             {
                 Item loaded = ItemIO.Load(savedSlots[i]);
-
                 ammoSlots[i] = loaded;
 
                 if (!IsAmmoItem(ammoSlots[i]))
                     ammoSlots[i].TurnToAir();
             }
+
+            selectedAmmoSlot = GetSelectedAmmoSlotIndex();
         }
 
         public override void PostUpdate()
@@ -76,6 +96,8 @@ namespace AMS
 
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
+            HandleAmmoCycleInput();
+
             if (UISystems.ammoWheel == null)
                 return;
 
@@ -108,10 +130,17 @@ namespace AMS
             if (weapon == null || weapon.IsAir || weapon.useAmmo <= 0 || ammoSlots == null)
                 return false;
 
-            int maxSlotsToCheck = Math.Min(unlockedAmmoSlots, ammoSlots.Length);
-            for (int i = 0; i < maxSlotsToCheck; i++)
+            int maxSlotsToCheck = GetUnlockedSlotCount();
+            if (maxSlotsToCheck <= 0)
+                return false;
+
+            int startIndex = GetSelectedAmmoSlotIndex();
+
+            for (int offset = 0; offset < maxSlotsToCheck; offset++)
             {
-                Item candidate = ammoSlots[i];
+                int index = WrapSlotIndex(startIndex + offset, maxSlotsToCheck);
+                Item candidate = ammoSlots[index];
+
                 if (!IsValidAmmoForWeapon(Player, weapon, candidate))
                     continue;
 
@@ -120,6 +149,91 @@ namespace AMS
             }
 
             return false;
+        }
+
+        public int GetSelectedAmmoSlotIndex()
+        {
+            int unlockedSlotCount = GetUnlockedSlotCount();
+            if (unlockedSlotCount <= 0)
+            {
+                selectedAmmoSlot = 0;
+                return 0;
+            }
+
+            selectedAmmoSlot = WrapSlotIndex(selectedAmmoSlot, unlockedSlotCount);
+            return selectedAmmoSlot;
+        }
+
+        public void SetSelectedAmmoSlot(int slotIndex)
+        {
+            int unlockedSlotCount = GetUnlockedSlotCount();
+            if (unlockedSlotCount <= 0)
+            {
+                selectedAmmoSlot = 0;
+                return;
+            }
+
+            selectedAmmoSlot = WrapSlotIndex(slotIndex, unlockedSlotCount);
+        }
+
+        public bool TryCycleSelectedAmmoSlot(int direction, Item weapon = null)
+        {
+            int unlockedSlotCount = GetUnlockedSlotCount();
+            if (unlockedSlotCount <= 1)
+                return false;
+
+            int step = direction >= 0 ? 1 : -1;
+            int startIndex = GetSelectedAmmoSlotIndex();
+            bool hasWeaponAmmoType = weapon != null && !weapon.IsAir && weapon.useAmmo > 0;
+
+            for (int offset = 1; offset <= unlockedSlotCount; offset++)
+            {
+                int candidateIndex = WrapSlotIndex(startIndex + (step * offset), unlockedSlotCount);
+                Item candidate = ammoSlots[candidateIndex];
+
+                bool validCandidate = hasWeaponAmmoType
+                    ? IsValidAmmoForWeapon(Player, weapon, candidate)
+                    : IsAmmoItem(candidate);
+
+                if (!validCandidate)
+                    continue;
+
+                if (candidateIndex == startIndex)
+                    return false;
+
+                selectedAmmoSlot = candidateIndex;
+                return true;
+            }
+
+            int fallbackIndex = WrapSlotIndex(startIndex + step, unlockedSlotCount);
+            if (fallbackIndex == startIndex)
+                return false;
+
+            selectedAmmoSlot = fallbackIndex;
+            return true;
+        }
+
+        public bool TryUnlockAmmoSlotsTo(int targetUnlockedSlots)
+        {
+            int clampedTarget = Math.Clamp(targetUnlockedSlots, StartingAmmoSlots, MaxAmmoSlots);
+            if (clampedTarget <= unlockedAmmoSlots)
+                return false;
+
+            unlockedAmmoSlots = clampedTarget;
+            selectedAmmoSlot = GetSelectedAmmoSlotIndex();
+            return true;
+        }
+
+        public void SyncUnlockedAmmoSlots(int toWho = -1, int fromWho = -1)
+        {
+            if (Main.netMode == NetmodeID.SinglePlayer)
+                return;
+
+            ModPacket packet = Mod.GetPacket();
+            packet.Write((byte)AMSMessageType.SyncUnlockedAmmoSlots);
+            packet.Write((byte)Player.whoAmI);
+            packet.Write((byte)unlockedAmmoSlots);
+            packet.Send(toWho, fromWho);
         }
 
         public void NormalizeAmmoSlots()
@@ -141,6 +255,8 @@ namespace AMS
                 if (ammoSlots[i].stack <= 0 || !IsAmmoItem(ammoSlots[i]))
                     ammoSlots[i].TurnToAir();
             }
+
+            selectedAmmoSlot = GetSelectedAmmoSlotIndex();
         }
 
         public static bool IsAmmoItem(Item item)
@@ -159,5 +275,119 @@ namespace AMS
 
             return ItemLoader.CanChooseAmmo(weapon, ammo, player);
         }
+
+        private int GetUnlockedSlotCount()
+        {
+            if (ammoSlots == null || ammoSlots.Length == 0)
+                return 0;
+
+            return Math.Clamp(unlockedAmmoSlots, 1, ammoSlots.Length);
+        }
+
+        private static int WrapSlotIndex(int index, int slotCount)
+        {
+            if (slotCount <= 0)
+                return 0;
+
+            int wrapped = index % slotCount;
+            if (wrapped < 0)
+                wrapped += slotCount;
+
+            return wrapped;
+        }
+
+        private void HandleAmmoCycleInput()
+        {
+            if (Main.gameMenu || Player == null || !Player.active)
+                return;
+
+            if (IsContextMenuOpen())
+                return;
+
+            int direction = 0;
+
+            if (AMS.AmmoCycleUpKeybind != null && AMS.AmmoCycleUpKeybind.JustPressed)
+                direction++;
+
+            if (AMS.AmmoCycleDownKeybind != null && AMS.AmmoCycleDownKeybind.JustPressed)
+                direction--;
+
+            int scrollDelta = PlayerInput.ScrollWheelDelta;
+            if (scrollDelta > 0 && ShouldUseMouseWheelFallback(AMS.AmmoCycleUpKeybind))
+                direction++;
+
+            if (scrollDelta < 0 && ShouldUseMouseWheelFallback(AMS.AmmoCycleDownKeybind))
+                direction--;
+
+            if (direction == 0)
+                return;
+
+            int step = direction > 0 ? 1 : -1;
+            if (TryCycleSelectedAmmoSlot(step, Player.HeldItem))
+                PlayWheelRotateSound();
+        }
+
+        private void PlayWheelRotateSound()
+        {
+            if (Main.dedServ || Player == null || Player.whoAmI != Main.myPlayer)
+                return;
+
+            SoundEngine.PlaySound(WheelRotateSoundPlaceholder);
+        }
+
+        private static bool IsContextMenuOpen()
+        {
+            if (Main.playerInventory || Main.mapFullscreen)
+                return true;
+
+            if (Main.InGameUI?.CurrentState != null)
+                return true;
+
+            return false;
+        }
+
+        private static bool ShouldUseMouseWheelFallback(ModKeybind keybind)
+        {
+            if (keybind == null)
+                return false;
+
+            foreach (InputMode mode in Enum.GetValues<InputMode>())
+            {
+                IList<string> assignedKeys = keybind.GetAssignedKeys(mode);
+                if (assignedKeys == null)
+                    continue;
+
+                for (int i = 0; i < assignedKeys.Count; i++)
+                {
+                    string key = assignedKeys[i];
+                    if (string.IsNullOrWhiteSpace(key))
+                        continue;
+
+                    if (key.Equals("None", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (IsMouseWheelAlias(key))
+                        continue;
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsMouseWheelAlias(string key)
+        {
+            return key.Equals("MouseScrollUp", StringComparison.OrdinalIgnoreCase)
+                || key.Equals("MouseScrollDown", StringComparison.OrdinalIgnoreCase)
+                || key.Equals("MouseWheelUp", StringComparison.OrdinalIgnoreCase)
+                || key.Equals("MouseWheelDown", StringComparison.OrdinalIgnoreCase)
+                || key.Equals("ScrollWheelUp", StringComparison.OrdinalIgnoreCase)
+                || key.Equals("ScrollWheelDown", StringComparison.OrdinalIgnoreCase)
+                || key.Equals("Mouse Wheel Up", StringComparison.OrdinalIgnoreCase)
+                || key.Equals("Mouse Wheel Down", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }
+
+

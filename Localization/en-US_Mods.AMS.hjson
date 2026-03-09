@@ -1,4 +1,8 @@
-"Keybinds.Ammo Wheel.DisplayName": Ammo Wheel
+Keybinds: {
+	"Ammo Wheel.DisplayName": Ammo Wheel
+	"Ammo Cycle Up.DisplayName": Ammo Cycle Up
+	"Ammo Cycle Down.DisplayName": Ammo Cycle Down
+}
 
 Configs: {
 	AmmoWheelClientConfig: {
@@ -6,12 +10,18 @@ Configs: {
 
 		Headers: {
 			Interaction: Interaction
+			Appearance: Appearance
 			WheelPosition: Wheel Position
 		}
 
 		ToggleWheelOnPress: {
 			Label: Press To Toggle Wheel
 			Tooltip: If enabled, pressing the keybind toggles the wheel open/closed instead of holding the key.
+		}
+
+		ThemePreset: {
+			Label: UI Theme Preset
+			Tooltip: Switch between AMS UI theme presets.
 		}
 
 		WheelOffsetX: {
@@ -24,4 +34,72 @@ Configs: {
 			Tooltip: Moves the wheel up/down from screen center.
 		}
 	}
+
+	AmmoWheelThemePreset: {
+		Tooltip: ""
+
+		Squares: {
+			Label: Squares
+			Tooltip: ""
+		}
+
+		BlueCircle: {
+			Label: Blue Circle
+			Tooltip: ""
+		}
+	}
 }
+
+Items: {
+	AmmoSlotUnlockTier1Item: {
+		DisplayName: AMS Slot Unlock I
+		Tooltip:
+			'''
+			Consumable
+			Permanently unlocks the second AMS ammo slot.
+			TODO: Replace with final flavor text.
+			'''
+	}
+
+	AmmoSlotUnlockTier2Item: {
+		DisplayName: AMS Slot Unlock II
+		Tooltip:
+			'''
+			Consumable
+			Permanently unlocks the third AMS ammo slot.
+			TODO: Replace with final flavor text.
+			'''
+	}
+
+	AmmoSlotUnlockTier3Item: {
+		DisplayName: AMS Slot Unlock III
+		Tooltip:
+			'''
+			Consumable
+			Permanently unlocks the fourth AMS ammo slot.
+			TODO: Replace with final flavor text.
+			'''
+	}
+
+	AmmoSlotUnlockTier4Item: {
+		DisplayName: AMS Slot Unlock IV
+		Tooltip:
+			'''
+			Consumable
+			Permanently unlocks the fifth AMS ammo slot.
+			TODO: Replace with final flavor text.
+			'''
+	}
+
+	AmmoSlotUnlockTier5Item: {
+		DisplayName: AMS Slot Unlock V
+		Tooltip:
+			'''
+			Consumable
+			Permanently unlocks the sixth AMS ammo slot.
+			TODO: Replace with final flavor text.
+			'''
+	}
+}
+
+Messages.AmmoSlotsUnlocked: AMS slots unlocked: {0}/{1}

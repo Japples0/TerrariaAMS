@@ -2,23 +2,15 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-string root = @"C:\Program Files (x86)\Steam\steamapps\common\tModLoader";
-var all = System.IO.Directory.GetFiles(root, "*.dll", System.IO.SearchOption.AllDirectories);
-var dllMap = all.GroupBy(p => System.IO.Path.GetFileName(p), StringComparer.OrdinalIgnoreCase)
-    .ToDictionary(g => g.Key, g => g.OrderBy(path => path.IndexOf("\\ref\\", StringComparison.OrdinalIgnoreCase) >= 0 ? 1 : 0).First(), StringComparer.OrdinalIgnoreCase);
-AppDomain.CurrentDomain.AssemblyResolve += (_, args) => {
-    string? n = new AssemblyName(args.Name).Name;
-    if (n == null) return null;
-    string key = n + ".dll";
-    return dllMap.TryGetValue(key, out string? p) ? Assembly.LoadFrom(p) : null;
-};
-var asm = Assembly.LoadFrom(System.IO.Path.Combine(root, "Libraries", "TerrariaHooks", "0.0.0.0", "TerrariaHooks.dll"));
-var t = asm.GetType("Terraria.UI.On_ItemSlot", false) ?? asm.GetType("Terraria.On_ItemSlot", false);
-Console.WriteLine(t?.FullName ?? "no type");
-if (t != null)
+string root=@"C:\Program Files (x86)\Steam\steamapps\common\tModLoader";
+var dlls=System.IO.Directory.GetFiles(root,"*.dll",System.IO.SearchOption.AllDirectories)
+ .GroupBy(System.IO.Path.GetFileName,StringComparer.OrdinalIgnoreCase)
+ .ToDictionary(g=>g.Key,g=>g.OrderBy(p=>p.IndexOf("\\ref\\",StringComparison.OrdinalIgnoreCase)>=0?1:0).First(),StringComparer.OrdinalIgnoreCase);
+AppDomain.CurrentDomain.AssemblyResolve += (_,a)=>{var n=new AssemblyName(a.Name).Name+".dll"; return dlls.TryGetValue(n,out var p)?Assembly.LoadFrom(p):null;};
+var asm=Assembly.LoadFrom(System.IO.Path.Combine(root,"tModLoader.dll"));
+var t=asm.GetType("Terraria.UI.ItemSlot",true)!;
+foreach(var m in t.GetMethods(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static|BindingFlags.Instance).Where(m=>m.Name.Contains("Radial")))
 {
-    foreach (var e in t.GetEvents(BindingFlags.Public|BindingFlags.Static).Where(e => e.Name.Contains("Draw") || e.Name.Contains("GetItemLight") || e.Name.Contains("Handle")))
-    {
-        Console.WriteLine(e.Name + " :: " + e.EventHandlerType?.Name);
-    }
+ var pars=string.Join(", ",m.GetParameters().Select(p=>$"{p.ParameterType.Name} {p.Name}"));
+ Console.WriteLine($"{m.ReturnType.Name} {m.Name}({pars}) static={m.IsStatic}");
 }

@@ -1,8 +1,14 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Terraria.ModLoader.Config;
 
 namespace AMS
 {
+    public enum AmmoWheelThemePreset
+    {
+        Squares,
+        BlueCircle
+    }
+
     public class AmmoWheelClientConfig : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -10,6 +16,10 @@ namespace AMS
         [Header("Interaction")]
         [DefaultValue(false)]
         public bool ToggleWheelOnPress;
+
+        [Header("Appearance")]
+        [DefaultValue(AmmoWheelThemePreset.Squares)]
+        public AmmoWheelThemePreset ThemePreset;
 
         [Header("WheelPosition")]
         [Range(-900f, 900f)]
