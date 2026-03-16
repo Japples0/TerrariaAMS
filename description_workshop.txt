@@ -1,1 +1,91 @@
-This description will show up on the steam page, check out https://steamcommunity.com/comment/Guide/formattinghelp.
+Terraria AMS – Advanced Ammo Management
+
+Stop digging through your inventory for ammo mid-fight.
+
+Terraria AMS (Advanced Ammo Management) introduces a radial ammo selection wheel that lets you quickly swap between ammunition types without opening your inventory.
+
+Inspired by weapon wheels seen in modern games, AMS makes ammo switching fast, intuitive, and combat-friendly while staying true to the feel of Terraria.
+
+Features
+Radial Ammo Wheel
+
+Quickly select ammo using a centered radial UI that appears instantly while playing.
+
+Dedicated Ammo Slots
+
+Store multiple ammo types in a separate management system without cluttering your inventory.
+
+Seamless Weapon Integration
+
+Weapons automatically use the currently selected ammo type from the wheel.
+
+Fast Switching During Combat
+
+Swap between ammunition types in real time without opening the inventory menu.
+
+Lightweight & Performance Friendly
+
+Designed to integrate smoothly with tModLoader without affecting gameplay performance.
+
+How It Works
+
+Open the ammo wheel.
+
+Select the ammo type you want to use.
+
+Fire your weapon normally.
+
+Your weapon will automatically consume ammo from the selected slot.
+
+No more inventory searching.
+No more accidental ammo switching.
+
+Current Development Status
+
+AMS is currently in active development, and more features are planned, including:
+
+Expanded UI improvements
+
+Better ammo count visualization
+
+Customizable controls
+
+Improved multiplayer support
+
+Additional quality-of-life features
+
+Feedback and suggestions are welcome!
+
+Compatibility
+
+Designed for tModLoader and should work with most mods that add new weapons or ammunition.
+
+If you encounter conflicts or bugs, please report them on the project repository.
+
+Project Repository
+
+Development for AMS is open source and available on GitHub:
+
+https://github.com/Japples0/TerrariaAMS
+
+Contributions, suggestions, and issue reports are welcome.
+
+Credits
+
+Developed by the AMS team.
+
+Special thanks to the tModLoader community for documentation, tools, and inspiration.
+
+Planned Features
+
+Ammo filtering
+
+Custom wheel themes
+
+Ammo priority controls
+
+UI scaling options
+
+Optional ammo HUD
+
+⭐ If you enjoy the mod, consider leaving a rating or feedback on the workshop page to help improve future updates!
