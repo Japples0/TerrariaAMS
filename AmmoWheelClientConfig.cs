@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Terraria.ModLoader.Config;
 
 namespace AMS
@@ -21,12 +21,6 @@ namespace AMS
         [DefaultValue(AmmoWheelThemePreset.Squares)]
         public AmmoWheelThemePreset ThemePreset;
 
-        [Range(0f, 1f)]
-        [Increment(0.05f)]
-        [Slider]
-        [DefaultValue(1f)]
-        public float WheelUiOpacity;
-
         [Header("WheelPosition")]
         [Range(-900f, 900f)]
         [Increment(5f)]
@@ -39,13 +33,5 @@ namespace AMS
         [Slider]
         [DefaultValue(0f)]
         public float WheelOffsetY;
-
-        [Header("Audio")]
-        [Range(0f, 1f)]
-        [Increment(0.05f)]
-        [Slider]
-        [DefaultValue(0.65f)]
-        public float WheelRotateVolume;
     }
 }
-

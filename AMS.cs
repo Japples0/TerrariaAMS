@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using Terraria;
 using Terraria.ID;
@@ -9,32 +9,30 @@ namespace AMS
     public class AMS : Mod
     {
         public static ModKeybind AMSKeybind;
-        public static ModKeybind AmmoCycleLeftKeybind;
-        public static ModKeybind AmmoCycleRightKeybind;
-
-        public const byte SyncUnlockedAmmoSlotsMessage = 0;
+        public static ModKeybind AmmoCycleUpKeybind;
+        public static ModKeybind AmmoCycleDownKeybind;
 
         public override void Load()
         {
             AMSKeybind = KeybindLoader.RegisterKeybind(this, "Ammo Wheel", "LeftAlt");
-            AmmoCycleLeftKeybind = KeybindLoader.RegisterKeybind(this, "Ammo Cycle Left", "Q");
-            AmmoCycleRightKeybind = KeybindLoader.RegisterKeybind(this, "Ammo Cycle Right", "E");
+            AmmoCycleUpKeybind = KeybindLoader.RegisterKeybind(this, "Ammo Cycle Up", "MouseScrollUp");
+            AmmoCycleDownKeybind = KeybindLoader.RegisterKeybind(this, "Ammo Cycle Down", "MouseScrollDown");
         }
 
         public override void Unload()
         {
             AMSKeybind = null;
-            AmmoCycleLeftKeybind = null;
-            AmmoCycleRightKeybind = null;
+            AmmoCycleUpKeybind = null;
+            AmmoCycleDownKeybind = null;
         }
 
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
-            byte messageType = reader.ReadByte();
+            AMSMessageType messageType = (AMSMessageType)reader.ReadByte();
 
             switch (messageType)
             {
-                case SyncUnlockedAmmoSlotsMessage:
+                case AMSMessageType.SyncUnlockedAmmoSlots:
                 {
                     int playerIndex = reader.ReadByte();
                     int unlockedSlots = reader.ReadByte();
