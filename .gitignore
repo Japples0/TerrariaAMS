@@ -8,17 +8,17 @@ obj/
 *.pdb
 
 # Visual Studio
-.vs/
+*.vs/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
 
 # JetBrains Rider
-.idea/
+*.idea/
 
 # VSCode
-.vscode/
+*.vscode/
 
 # Logs
 *.log
