@@ -1,8 +1,9 @@
 using AMS.Systems;
 using System;
 using System.Collections.Generic;
-using Terraria.Audio;
+using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -19,8 +20,12 @@ namespace AMS
         public int selectedAmmoSlot;
         public Item[] ammoSlots;
 
-        // Placeholder SFX. Swap this to a custom SoundStyle path when your wheel sound is ready.
-        private static readonly SoundStyle WheelRotateSoundPlaceholder = SoundID.MenuTick with
+        private const float WheelRotationStep = 0.18f;
+
+        private float wheelRotation;
+        private float wheelRotationTarget;
+
+        private static readonly SoundStyle WheelRotateSound = new SoundStyle("AMS/Assets/SoundFX/ammo_cycle")
         {
             Volume = 0.65f,
             PitchVariance = 0.08f
@@ -33,6 +38,8 @@ namespace AMS
             unlockedAmmoSlots = StartingAmmoSlots;
             selectedAmmoSlot = 0;
             ammoSlots = new Item[MaxAmmoSlots];
+            wheelRotation = 0f;
+            wheelRotationTarget = 0f;
 
             for (int i = 0; i < ammoSlots.Length; i++)
             {
@@ -73,6 +80,8 @@ namespace AMS
             if (!tag.ContainsKey("ammoSlots"))
             {
                 selectedAmmoSlot = GetSelectedAmmoSlotIndex();
+                wheelRotationTarget = GetTargetRotation();
+                wheelRotation = wheelRotationTarget;
                 return;
             }
 
@@ -87,11 +96,14 @@ namespace AMS
             }
 
             selectedAmmoSlot = GetSelectedAmmoSlotIndex();
+            wheelRotationTarget = GetTargetRotation();
+            wheelRotation = wheelRotationTarget;
         }
 
         public override void PostUpdate()
         {
             NormalizeAmmoSlots();
+            UpdateWheelRotation();
         }
 
         public override void ProcessTriggers(TriggersSet triggersSet)
@@ -157,10 +169,12 @@ namespace AMS
             if (unlockedSlotCount <= 0)
             {
                 selectedAmmoSlot = 0;
+                UpdateWheelRotationTarget();
                 return 0;
             }
 
             selectedAmmoSlot = WrapSlotIndex(selectedAmmoSlot, unlockedSlotCount);
+            UpdateWheelRotationTarget();
             return selectedAmmoSlot;
         }
 
@@ -170,10 +184,12 @@ namespace AMS
             if (unlockedSlotCount <= 0)
             {
                 selectedAmmoSlot = 0;
+                UpdateWheelRotationTarget();
                 return;
             }
 
             selectedAmmoSlot = WrapSlotIndex(slotIndex, unlockedSlotCount);
+            UpdateWheelRotationTarget();
         }
 
         public bool TryCycleSelectedAmmoSlot(int direction, Item weapon = null)
@@ -202,6 +218,7 @@ namespace AMS
                     return false;
 
                 selectedAmmoSlot = candidateIndex;
+                UpdateWheelRotationTarget();
                 return true;
             }
 
@@ -210,6 +227,7 @@ namespace AMS
                 return false;
 
             selectedAmmoSlot = fallbackIndex;
+            UpdateWheelRotationTarget();
             return true;
         }
 
@@ -230,7 +248,7 @@ namespace AMS
                 return;
 
             ModPacket packet = Mod.GetPacket();
-            packet.Write((byte)AMSMessageType.SyncUnlockedAmmoSlots);
+            packet.Write(AMS.SyncUnlockedAmmoSlotsMessage);
             packet.Write((byte)Player.whoAmI);
             packet.Write((byte)unlockedAmmoSlots);
             packet.Send(toWho, fromWho);
@@ -304,20 +322,24 @@ namespace AMS
             if (IsContextMenuOpen())
                 return;
 
+            bool wheelVisible = UISystems.ammoWheel != null && UISystems.ammoWheel.Visible;
             int direction = 0;
 
-            if (AMS.AmmoCycleUpKeybind != null && AMS.AmmoCycleUpKeybind.JustPressed)
+            if (AMS.AmmoCycleRightKeybind != null && AMS.AmmoCycleRightKeybind.JustPressed)
                 direction++;
 
-            if (AMS.AmmoCycleDownKeybind != null && AMS.AmmoCycleDownKeybind.JustPressed)
+            if (AMS.AmmoCycleLeftKeybind != null && AMS.AmmoCycleLeftKeybind.JustPressed)
                 direction--;
 
-            int scrollDelta = PlayerInput.ScrollWheelDelta;
-            if (scrollDelta > 0 && ShouldUseMouseWheelFallback(AMS.AmmoCycleUpKeybind))
-                direction++;
+            if (wheelVisible)
+            {
+                int scrollDelta = PlayerInput.ScrollWheelDelta;
+                if (scrollDelta > 0)
+                    direction++;
 
-            if (scrollDelta < 0 && ShouldUseMouseWheelFallback(AMS.AmmoCycleDownKeybind))
-                direction--;
+                if (scrollDelta < 0)
+                    direction--;
+            }
 
             if (direction == 0)
                 return;
@@ -332,62 +354,48 @@ namespace AMS
             if (Main.dedServ || Player == null || Player.whoAmI != Main.myPlayer)
                 return;
 
-            SoundEngine.PlaySound(WheelRotateSoundPlaceholder);
+            AmmoWheelClientConfig config = ModContent.GetInstance<AmmoWheelClientConfig>();
+            SoundStyle style = WheelRotateSound;
+            style.Volume = Math.Clamp(config.WheelRotateVolume, 0f, 1f);
+            SoundEngine.PlaySound(style);
+        }
+
+        public float GetWheelRotation()
+        {
+            return wheelRotation;
+        }
+
+        private void UpdateWheelRotationTarget()
+        {
+            wheelRotationTarget = GetTargetRotation();
+        }
+
+        private float GetTargetRotation()
+        {
+            float segmentAngle = MathHelper.TwoPi / MaxAmmoSlots;
+            return MathHelper.WrapAngle(-selectedAmmoSlot * segmentAngle);
+        }
+
+        private void UpdateWheelRotation()
+        {
+            float diff = MathHelper.WrapAngle(wheelRotationTarget - wheelRotation);
+            if (Math.Abs(diff) <= WheelRotationStep)
+            {
+                wheelRotation = wheelRotationTarget;
+                return;
+            }
+
+            wheelRotation += Math.Sign(diff) * WheelRotationStep;
+            wheelRotation = MathHelper.WrapAngle(wheelRotation);
         }
 
         private static bool IsContextMenuOpen()
         {
-            if (Main.playerInventory || Main.mapFullscreen)
-                return true;
-
-            if (Main.InGameUI?.CurrentState != null)
-                return true;
-
-            return false;
-        }
-
-        private static bool ShouldUseMouseWheelFallback(ModKeybind keybind)
-        {
-            if (keybind == null)
-                return false;
-
-            foreach (InputMode mode in Enum.GetValues<InputMode>())
-            {
-                IList<string> assignedKeys = keybind.GetAssignedKeys(mode);
-                if (assignedKeys == null)
-                    continue;
-
-                for (int i = 0; i < assignedKeys.Count; i++)
-                {
-                    string key = assignedKeys[i];
-                    if (string.IsNullOrWhiteSpace(key))
-                        continue;
-
-                    if (key.Equals("None", StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    if (IsMouseWheelAlias(key))
-                        continue;
-
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool IsMouseWheelAlias(string key)
-        {
-            return key.Equals("MouseScrollUp", StringComparison.OrdinalIgnoreCase)
-                || key.Equals("MouseScrollDown", StringComparison.OrdinalIgnoreCase)
-                || key.Equals("MouseWheelUp", StringComparison.OrdinalIgnoreCase)
-                || key.Equals("MouseWheelDown", StringComparison.OrdinalIgnoreCase)
-                || key.Equals("ScrollWheelUp", StringComparison.OrdinalIgnoreCase)
-                || key.Equals("ScrollWheelDown", StringComparison.OrdinalIgnoreCase)
-                || key.Equals("Mouse Wheel Up", StringComparison.OrdinalIgnoreCase)
-                || key.Equals("Mouse Wheel Down", StringComparison.OrdinalIgnoreCase);
+            return Main.playerInventory || Main.mapFullscreen;
         }
     }
 }
+
+
 
 

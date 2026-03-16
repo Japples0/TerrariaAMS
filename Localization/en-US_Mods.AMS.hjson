@@ -2,6 +2,8 @@ Keybinds: {
 	"Ammo Wheel.DisplayName": Ammo Wheel
 	"Ammo Cycle Up.DisplayName": Ammo Cycle Up
 	"Ammo Cycle Down.DisplayName": Ammo Cycle Down
+	"Ammo Cycle Right.DisplayName": Ammo  Cycle  Right
+	"Ammo Cycle Left.DisplayName": Ammo  Cycle  Left
 }
 
 Configs: {
@@ -12,6 +14,7 @@ Configs: {
 			Interaction: Interaction
 			Appearance: Appearance
 			WheelPosition: Wheel Position
+			Audio: Audio Header
 		}
 
 		ToggleWheelOnPress: {
@@ -32,6 +35,16 @@ Configs: {
 		WheelOffsetY: {
 			Label: Wheel Offset Y
 			Tooltip: Moves the wheel up/down from screen center.
+		}
+
+		WheelRotateVolume: {
+			Tooltip: ""
+			Label: Wheel Rotate Volume
+		}
+
+		WheelUiOpacity: {
+			Tooltip: ""
+			Label: Wheel Ui Opacity
 		}
 	}
 
